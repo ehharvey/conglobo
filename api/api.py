@@ -12,21 +12,19 @@ def health_check():
     return {
             "health":"Good", "status":True}
     
-# CRUD on services also need list of services we offer, on services
-
-@app.route("/active-services", methods = ['GET', 'POST'])
+@app.route("/services", methods = ['GET', 'POST'])
 def active_services():
     if request.method == 'GET':
-        with open('api/active-services.json', 'r') as f:
+        with open('api/services.json', 'r') as f:
             data = json.load(f)
             return jsonify(data)
         
     elif request.method == 'POST':
-        # update active-services.json with form data
+
         on_services = request.form.get('on')
         off_services = request.form.get('off')
         if on_services or off_services:
-            with open('api/active-services.json', 'r+') as f:
+            with open('api/services.json', 'r+') as f:
                 data = json.load(f)
                 services = data['services']
                 if on_services:
@@ -60,6 +58,8 @@ def active_services():
             return jsonify({'message': message})
         else:
             return jsonify({'error': 'Missing on or off parameter.'})
+
+
 
 if __name__ == "__main__":
     app.run(debug=True,host='0.0.0.0')
