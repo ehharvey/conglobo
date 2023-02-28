@@ -1,0 +1,9 @@
+POST /services HTTP/1.1
+Host: localhost:5000
+Content-Type: application/x-www-form-urlencoded
+
+on=service1,service3&off=service2
+
+GET /services HTTP/1.1
+Host: localhost:5000
+Content-Type: application/x-www-form-urlencoded
