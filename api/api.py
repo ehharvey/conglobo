@@ -7,21 +7,79 @@ with open('services.json', 'r') as f:
     services = json.load(f)
     
 with open('active-services.json', 'r') as f:
-    activeServices = json.load(f)
+    active_services = json.load(f)
 
 # ------ Single Node API ------ 
+
+
+# CRUD services
+
+# ------ Cluster Node API ------ 
+
 @app.route("/health-check")
 def health_check():
     return {
             "health":"Good", "status":True}
     
-@app.route('/active-services', methods=['GET'])
-def get_services():
-    return jsonify("/api/active-services.json")
+# Gets the active-services and their statuses
+@app.route('/active-service', methods=['GET'])
+def get_active_services():
+    return jsonify(active_services), 200  # OK
 
-# CRUD services
+# Change the active status of a service
+@app.route('/active-service/toggle', methods=['POST'])
+def set_active_service():
+    title = request.args.get('title')
+    status = request.args.get('status')
 
-# ------ Cluster Node API ------ 
+    if not title or not status:
+        abort(400)  # Bad request
+
+    if title not in active_services['active-services']:
+        abort(404)  # Not found
+
+    active_services['active-services'][title]['status'] = status
+
+    with open('active-services.json', 'w') as f:
+        json.dump(active_services, f)
+
+    return jsonify(active_services['active-services'][title]), 200  # OK
+
+# Adds an active-service 
+@app.route('/active-service', methods=['POST'])
+def add_active_service():
+    if not request.json or 'title' not in request.json:
+        abort(400)  # Bad request
+
+    title = request.json['title']
+
+    if title in active_services['active-services']:
+        abort(409)  # Conflict
+
+    active_services['active-services'][title] = {'status': False}
+
+    with open('active-services.json', 'w') as f:
+        json.dump(active_services, f)
+
+    return jsonify({'result': True}), 201  # Created
+
+# Removes an active service from the list
+@app.route('/active-service', methods=['DELETE'])
+def delete_active_service():
+    title = request.args.get('title')
+
+    if not title:
+        abort(400)  # Bad request
+
+    if title not in active_services['active-services']:
+        abort(404)  # Not found
+
+    del active_services['active-services'][title]
+
+    with open('active-services.json', 'w') as f:
+        json.dump(active_services, f)
+
+    return jsonify({'result': True}), 200  # OK
 
 # ------ Misc. API ------ 
 
