@@ -1,1 +1,16 @@
-{"services": {"service1": {"title": "service1", "description": "description", "active": true}, "service2": {"title": "service2", "description": "description", "active": false}, "service3": {"title": "service3", "description": "description", "active": true}}}
+{
+    "services": {
+        "service1": {
+            "title": "service1",
+            "description": "description"
+        },
+        "service2": {
+            "title": "service2",
+            "description": "description"
+        },
+        "service3": {
+            "title": "service3",
+            "description": "description"
+        }
+    }
+}
