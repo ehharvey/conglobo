@@ -1,10 +1,15 @@
 import json
 import os
+import socket
 from flask import Flask, abort, jsonify, request, send_file 
+import socket
+hostname = socket.gethostname()
+IPAddr = socket.gethostbyname(hostname)
+
 
 app = Flask(__name__)
 
-node = {"health":"Good", "status":True}
+node = {"ip":IPAddr,"health":"Good", "status":True}
 
 cwd = os.getcwd()
 
@@ -14,10 +19,10 @@ with open(cwd + '/api/services.json', 'r') as f:
 with open(cwd + '/api/active-services.json', 'r') as f:
     active_services = json.load(f)
 
-
 @app.route("/health-check")
 def health_check():
     return jsonify(node)
+
 
 @app.route('/node/activate', methods=['POST'])
 def activate_node():
