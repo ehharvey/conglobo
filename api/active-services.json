@@ -1,10 +1,11 @@
 {
-    "active-services": {
-        "service1": {"status":false
-        },
-        "service2": {"status":false
+    "service1": {
+        "status": true
     },
-        "service3": {"status":false
-    }
+    "service2": {
+        "status": false
+    },
+    "service3": {
+        "status": false
     }
 }

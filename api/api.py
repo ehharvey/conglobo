@@ -1,25 +1,33 @@
 import json
+import os
 from flask import Flask, abort, jsonify, request, send_file 
 
 app = Flask(__name__)
 
-with open('services.json', 'r') as f:
+node = {"health":"Good", "status":True}
+
+cwd = os.getcwd()
+
+with open(cwd + '/api/services.json', 'r') as f:
     services = json.load(f)
     
-with open('active-services.json', 'r') as f:
+with open(cwd + '/api/active-services.json', 'r') as f:
     active_services = json.load(f)
 
-# ------ Single Node API ------ 
-
-
-# CRUD services
-
-# ------ Cluster Node API ------ 
 
 @app.route("/health-check")
 def health_check():
-    return {
-            "health":"Good", "status":True}
+    return jsonify(node)
+
+@app.route('/node/activate', methods=['POST'])
+def activate_node():
+    node['status'] = True
+    return jsonify(node)
+
+@app.route('/node/deactivate', methods=['POST'])
+def deactivate_node():
+    node['status'] = False
+    return jsonify(node)
     
 # Gets the active-services and their statuses
 @app.route('/active-service', methods=['GET'])
@@ -35,15 +43,15 @@ def set_active_service():
     if not title or not status:
         abort(400)  # Bad request
 
-    if title not in active_services['active-services']:
+    if title not in active_services:
         abort(404)  # Not found
 
-    active_services['active-services'][title]['status'] = status
+    active_services[title]['status'] = status.lower() == 'true'
 
-    with open('active-services.json', 'w') as f:
+    with open(cwd + '/api/active-services.json', 'w') as f:
         json.dump(active_services, f)
 
-    return jsonify(active_services['active-services'][title]), 200  # OK
+    return jsonify(active_services[title]), 200  # OK
 
 # Adds an active-service 
 @app.route('/active-service', methods=['POST'])
@@ -53,12 +61,12 @@ def add_active_service():
 
     title = request.json['title']
 
-    if title in active_services['active-services']:
+    if title in active_services:
         abort(409)  # Conflict
 
-    active_services['active-services'][title] = {'status': False}
+    active_services[title] = {'status': False}
 
-    with open('active-services.json', 'w') as f:
+    with open(cwd + '/api/active-services.json', 'w') as f:
         json.dump(active_services, f)
 
     return jsonify({'result': True}), 201  # Created
@@ -71,54 +79,56 @@ def delete_active_service():
     if not title:
         abort(400)  # Bad request
 
-    if title not in active_services['active-services']:
+    if title not in active_services:
         abort(404)  # Not found
 
-    del active_services['active-services'][title]
+    del active_services[title]
 
-    with open('active-services.json', 'w') as f:
+    with open(cwd + '/api/active-services.json', 'w') as f:
         json.dump(active_services, f)
 
     return jsonify({'result': True}), 200  # OK
 
-# ------ Misc. API ------ 
 
 # Gets all the avaliable services in the services file
 @app.route('/services', methods=['GET'])
 def get_services():
-    return jsonify("/api/services.json")
+    with open(cwd + '/api/services.json', 'r') as f:
+        data = json.load(f)
+    return jsonify(data)
 
 # Addds a new service to the services file
 @app.route('/services', methods=['POST'])
 def add_service():
     if not request.json or 'title' not in request.json:
-        abort(400) 
+        abort(400)
+
+    with open(cwd + '/api/services.json', 'r') as f:
+        services = json.load(f)
 
     new_service = {
         'title': request.json['title'],
         'description': request.json.get('description', ''),
     }
+    services[new_service['title']] = new_service
 
-    services.append(new_service)
-
-    with open('services.json', 'w') as f:
+    with open(cwd + '/api/services.json', 'w') as f:
         json.dump(services, f)
 
-    return jsonify(new_service), 201  
+    return jsonify(services), 201
 
 # Removes a service from the services file
 @app.route('/services/<string:title>', methods=['DELETE'])
 def delete_service(title):
-    for i, service in enumerate(services):
-        if service['title'] == title:
-            services.pop(i)
+    if title in services:
+        services.pop(title)
 
-            with open('services.json', 'w') as f:
-                json.dump(services, f)
+        with open(cwd + '/api/services.json', 'w') as f:
+            json.dump(services, f)
 
-            return '', 204  
+        return jsonify({'result': True}), 200  # OK
 
-    abort(404) 
+    abort(404)
 
 if __name__ == "__main__":
     app.run(debug=True,host='0.0.0.0')
