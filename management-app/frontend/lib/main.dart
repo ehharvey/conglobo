@@ -40,6 +40,72 @@ class _PageSelectorState extends State<PageSelector> {
       appBar: AppBar(
         title: const Text('Conglobo'),
       ),
+      body: Row(
+        children: [
+          NavigationRail(
+            backgroundColor: Color.fromARGB(255, 238, 243, 255),
+            labelType: NavigationRailLabelType.all,
+            leading: const Padding(
+              padding: EdgeInsets.symmetric(vertical: 10.0),
+              child: RotatedBox(
+                quarterTurns: -1,
+                child: Text(
+                  'Conglobo',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ),
+            destinations: const [
+              NavigationRailDestination(
+                icon: Icon(Icons.home),
+                label: Text('Home'),
+              ),
+              NavigationRailDestination(
+                icon: Icon(Icons.screenshot_monitor),
+                label: Text('Setup'),
+              ),
+              NavigationRailDestination(
+                icon: Icon(Icons.settings),
+                label: Text('Settings'),
+              ),
+            ],
+            selectedIndex: currentPage,
+            onDestinationSelected: (int index) {
+              setState(() {
+                currentPage = index;
+              });
+            },
+          ),
+          Expanded(
+            child: pages[currentPage],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/*
+class PageSelector extends StatefulWidget {
+  const PageSelector({super.key});
+
+  @override
+  State<PageSelector> createState() => _PageSelectorState();
+}
+
+class _PageSelectorState extends State<PageSelector> {
+  int currentPage = 0;
+  List<Widget> pages = const [HomeScreen(), SetupScreen(), SettingsScreen()];
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Conglobo'),
+      ),
       body: pages[currentPage],
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
@@ -94,3 +160,4 @@ class _PageSelectorState extends State<PageSelector> {
     );
   }
 }
+*/
