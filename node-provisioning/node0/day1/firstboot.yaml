@@ -1,0 +1,49 @@
+---
+# This is an Ansible Playbook that handles "Day 1" Activies (stuff to do post-install)
+# This playbook should run 
+- name: Initial Provision
+  hosts: localhost
+  vars:
+    secrets_url: http://192.168.46.100/api
+    secrets: >-
+      {{ 
+        lookup('ansible.builtin.url', 
+          secrets_url, 
+          split_lines=false)
+
+        | from_json
+      }}
+  tasks:
+    - name: Tailscale
+      block:
+      - name: Install
+        ansible.builtin.shell: curl -fsSL https://tailscale.com/install.sh | sh
+      
+      - name: Set up
+        ansible.builtin.shell: "tailscale up --authkey {{ secrets.tailscale_apikey }} --hostname node0"
+        become: true
+    
+    - name: NFS
+      block:
+        - name: Install required packages
+          ansible.builtin.package:
+            name: nfs
+            state: present
+          become: true
+
+    - name: K8s
+      block:
+        - name: Install MicroK8s
+          community.general.snap:
+            name: microk8s
+            classic: true
+            state: present
+          become: true
+          register: microk8s
+        
+        - name: Install Web UI
+          debug:
+            msg: "NOT IMPLEMENTED"
+        
+
+    

@@ -1,0 +1,32 @@
+#cloud-config
+autoinstall:
+  version: 1
+  update: yes
+  keyboard: {layout: us, toggle: null, variant: ''}
+  locale: en_US.UTF-8
+  identity:
+    hostname: node0-day0
+    # password: "$6$rounds=4096$saltsaltlettuce$Lp/FV.2oOgew7GbM6Nr8KMGMBn7iFM0x9ZwLqtx9Y4QJmKvfcnS.2zx4MKmymCPQGpHS7gqYOiqWjvdCIV2uN."
+    username: maintenance
+  ssh:
+    allow-pw: false
+    install-server: true
+  packages:
+    - python3-pip
+    - python3.10-venv
+  storage:
+    swap:
+        size: 0
+  late-commands:
+    - # Retrieve and run script
+  user-data: # Cloud-init starts here
+    disable_root: true
+    users:
+      - name: maintenance
+        groups: users, admin, docker, sudo
+        sudo: ALL=(ALL) NOPASSWD:ALL
+        shell: /bin/bash
+        lock_passwd: true
+
+# This is an AutoInstall config for Ubuntu: https://ubuntu.com/server/docs/install/autoinstall
+# This project lets you build an AutoInstall ISO: https://github.com/cloudymax/pxeless
