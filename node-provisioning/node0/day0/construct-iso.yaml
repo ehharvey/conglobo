@@ -1,0 +1,105 @@
+---
+- name: Construct ISO
+  hosts: localhost
+  connection: local
+  tasks:
+    - name: Ensure ubuntu server ISO exists
+
+    - name: Ensure previous extraction is not present
+      ansible.builtin.file:
+        name: ./ubuntu-server/
+        state: "{{ item }}"
+      loop:
+        - absent
+        - directory
+      
+    - name: Extract ISO
+      ansible.builtin.shell: "{{ item }}"
+      loop:
+        - xorriso -osirrox on -indev "./ubuntu-server.iso" -extract / "./ubuntu-server"
+        - chmod -R u+w "./ubuntu-server/"
+    
+    - name: Ensure that config directory is present on extraction
+      ansible.builtin.file:
+        name: ./ubuntu-server/nocloud
+        state: directory
+    
+    - name: Copy user-data into extracted iso
+      ansible.builtin.copy:
+        src: ./user-data.basic
+        dest: ./ubuntu-server/nocloud/user-data
+    
+    - name: Ensure meta-data is present
+      ansible.builtin.file:
+        name: ./ubuntu-server/nocloud/meta-data
+        state: touch
+
+    - name: Insert grub.cfg
+      ansible.builtin.copy:
+        src: ./grub.cfg
+        dest: ./ubuntu-server/boot/grub/grub.cfg
+    
+    - name: Ensure no previous ISO creations are present
+      ansible.builtin.file:
+        name: ./ubuntu-server-autoinstall.iso
+        state: absent
+    
+
+
+
+    # To generate relevant options for xorriso
+    # run xorriso -indev ubuntu-server.iso -report_el_torito as_mkisofs
+    # *ALWAYS KEEP -as mkisofs option
+    # Make sure to add -o (output name) as well as source directory
+    #   (extraction of original ISO)
+    - name: Create ISO
+      ansible.builtin.shell: >-
+        xorriso -as mkisofs \
+        -V 'Ubuntu-Server 22.04.2 LTS amd64'
+        --grub2-mbr --interval:local_fs:0s-15s:zero_mbrpt,zero_gpt:'ubuntu-server.iso'
+        --protective-msdos-label
+        -partition_cyl_align off
+        -partition_offset 16
+        --mbr-force-bootable
+        -append_partition 2 28732ac11ff8d211ba4b00a0c93ec93b --interval:local_fs:3848588d-3858655d::'ubuntu-server.iso'
+        -appended_part_as_gpt
+        -iso_mbr_part_type a2a0d0ebe5b9334487c068b6b72699c7
+        -c '/boot.catalog'
+        -b '/boot/grub/i386-pc/eltorito.img'
+        -no-emul-boot
+        -boot-load-size 4
+        -boot-info-table
+        --grub2-boot-info
+        -eltorito-alt-boot
+        -e '--interval:appended_partition_2_start_962147s_size_10068d:all::'
+        -no-emul-boot
+        -boot-load-size 10068
+        -o ubuntu-server-autoinstall.iso
+        ./ubuntu-server/
+        
+    - name: Cleanup extraction
+      ansible.builtin.file:
+        name: ./ubuntu-server/
+        state: absent
+
+
+    # - name: Create ISO
+    #   ansible.builtin.shell: >-
+    #     mkisofs -R
+    #     -V "ubuntu auto"  
+    #     -o ./ubuntu-server-autoinstall.iso 
+    #     ./ubuntu-server/
+
+    # Does not work:
+    # community.general.iso_customize cannot add RockRidge extension to ISO
+    #
+    # - community.general.iso_customize:
+    #     add_files:
+    #       - src_file: ./user-data.basic
+    #         dest_file: nocloud/user-data
+    #       - src_file: ./meta-data.yaml
+    #         dest_file: nocloud/meta-data
+    #       - src_file: ./grub.cfg
+    #         dest_file: boot/grub/grub.cfg
+    #     src_iso: ./ubuntu-server.iso
+    #     dest_iso: ./ubuntu-server-autoinstall.iso
