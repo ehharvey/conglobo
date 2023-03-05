@@ -50,7 +50,7 @@ class _PageSelectorState extends State<PageSelector> {
               child: RotatedBox(
                 quarterTurns: -1,
                 child: Text(
-                  'Conglobo',
+                  '',
                   style: TextStyle(
                     color: Colors.white,
                     fontSize: 20,
