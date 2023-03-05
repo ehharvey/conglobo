@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:frontend/widgets/app_widgets.dart';
@@ -14,6 +16,33 @@ class _HomeScreenState extends State<HomeScreen> {
   String? _selectedUbuntiVersion;
   String? _selectedVpn;
   bool _isNetMaker = false;
+  String? _tailScaleKey;
+  double _progressValue = 0.0;
+  Timer? _timer;
+
+  void _startSetup() {
+    setState(() {
+      _progressValue = 0.0;
+    });
+
+    // Start the timer to increment the progress bar
+    _timer = Timer.periodic(Duration(seconds: 1), (timer) {
+      setState(() {
+        if (_progressValue < 1.0) {
+          _progressValue += 0.5;
+        } else {
+          // Stop the timer when the setup is complete
+          _timer?.cancel();
+        }
+      });
+    });
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel(); // Cancel the timer when the widget is disposed
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -120,6 +149,9 @@ class _HomeScreenState extends State<HomeScreen> {
                             ),
                             onChanged: (value) {
                               // Do something with the value entered in the text field
+                              if (value != '') {
+                                _tailScaleKey = value;
+                              }
                             },
                           )
                   ]),
@@ -164,15 +196,18 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ),
           ElevatedButton(
-            onPressed: () {},
+            onPressed: () {
+              _startSetup();
+            },
             child: const Text("BEGIN INSTALLATION"),
           ),
           const SizedBox(
             height: 20,
           ),
-          const LinearProgressIndicator(
+          LinearProgressIndicator(
+            value: _progressValue,
             backgroundColor: Colors.grey,
-            valueColor: AlwaysStoppedAnimation<Color>(Colors.blue),
+            valueColor: AlwaysStoppedAnimation<Color>(Colors.green),
           )
         ],
       ),
