@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:path/path.dart' as path;
 
+
 class UbuntuIsoRemote {
   static const urlHost = 'releases.ubuntu.com';
   final Uri isoUri;
@@ -23,7 +24,6 @@ class IsoDownloader {
   : isoPath = File(path.join(storageRoot.path, 'isos', remote.name));
 
   // Downloads the ISO if not already saved
-  var content_length = 1;
   Future<void> getIso() async {
     var creation = isoPath.create(recursive: true);
 
@@ -51,6 +51,12 @@ class IsoDownloader {
     
     print("Download done");
     httpClient.close();
+    openedIso.flush();
+    openedIso.close();
+  }
+
+  Future<void> unzip() async {
+    
   }
     
 

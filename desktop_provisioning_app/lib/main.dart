@@ -1,14 +1,46 @@
 import 'dart:io';
-
+import 'package:path_provider/path_provider.dart';
 import 'package:flutter/material.dart';
 import 'iso_downloader.dart';
+import 'package:flutter/services.dart' show rootBundle;
+import 'package:path/path.dart' as path;
 
 void main() {
+  getApplicationDocumentsDirectory()
+  .then((dir) async {
+    final unzipper = File(path.join(dir.path, '7z'));
+    print("Unzipper path: ${unzipper.path}");
+    var unzipper_writer = unzipper.openWrite();
+    rootBundle.load('assets/7z/7zz').asStream().listen((data) {
+      unzipper_writer.add(data.buffer.asInt8List());
+     })
+    .onDone(() {
+      unzipper_writer.close().then((value) {
+        print("Done extracting");
+        Process.runSync('chmod', ['+x', unzipper.path]);
+        Process.run(unzipper.path, [
+          'x',
+          '-y',
+          '-o./test',
+          './test/isos/ubuntu-server.iso'
+        ])
+        .then((result) {
+          print("output: ${result.stdout}");
+          print("err: ${result.stderr}");
+        });
+        print("Done");
+      });
+     });
+  });
   IsoDownloader downloader = IsoDownloader(
     Directory('./test'), 
     UbuntuIsoRemote());
 
-  downloader.getIso();
+  // downloader.getIso();
+  downloader.unzip();
+
+
+
   runApp(const MyApp());
 }
 

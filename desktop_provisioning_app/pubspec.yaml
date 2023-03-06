@@ -1,3 +1,4 @@
+---
 name: desktop_provisioning_app
 description: A new Flutter project.
 # The following line prevents the package from being accidentally published to
@@ -62,7 +63,8 @@ flutter:
   uses-material-design: true
 
   # To add assets to your application, add an assets section, like this:
-  # assets:
+  assets:
+    - assets/7z/
   #   - images/a_dot_burr.jpeg
   #   - images/a_dot_ham.jpeg
 
