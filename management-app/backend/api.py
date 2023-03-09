@@ -13,10 +13,10 @@ node = {"ip":IPAddr,"health":"Good", "status":True}
 
 cwd = os.getcwd()
 
-with open(cwd + '/management-app/backend/services.json', 'r') as f:
+with open(cwd + '/services.json', 'r') as f:
     services = json.load(f)
     
-with open(cwd + '/management-app/backend/active-services.json', 'r') as f:
+with open(cwd + '/active-services.json', 'r') as f:
     active_services = json.load(f)
 
 @app.route("/health-check")
@@ -57,7 +57,7 @@ def set_active_service():
     else:
         active_services[title]['status'] = True
 
-    with open(cwd + '/management-app/backend/active-services.json', 'w') as f:
+    with open(cwd + '/active-services.json', 'w') as f:
         json.dump(active_services, f)
 
     return jsonify(active_services[title]), 200  # OK
@@ -75,7 +75,7 @@ def add_active_service():
 
     active_services[title] = {'status': False}
 
-    with open(cwd + '/management-app/backend/active-services.json', 'w') as f:
+    with open(cwd + '/active-services.json', 'w') as f:
         json.dump(active_services, f)
 
     return jsonify({'result': True}), 201  # Created
@@ -93,7 +93,7 @@ def delete_active_service():
 
     del active_services[title]
 
-    with open(cwd + '/management-app/backend/active-services.json', 'w') as f:
+    with open(cwd + '/active-services.json', 'w') as f:
         json.dump(active_services, f)
 
     return jsonify({'result': True}), 200  # OK
@@ -102,7 +102,7 @@ def delete_active_service():
 # Gets all the avaliable services in the services file
 @app.route('/services', methods=['GET'])
 def get_services():
-    with open(cwd + '/management-app/backend/services.json', 'r') as f:
+    with open(cwd + '/services.json', 'r') as f:
         data = json.load(f)
     return jsonify(data)
 
@@ -112,7 +112,7 @@ def add_service():
     if not request.json or 'title' not in request.json:
         abort(400)
 
-    with open(cwd + '/management-app/backend/services.json', 'r') as f:
+    with open(cwd + '/services.json', 'r') as f:
         services = json.load(f)
 
     new_service = {
@@ -121,7 +121,7 @@ def add_service():
     }
     services[new_service['title']] = new_service
 
-    with open(cwd + '/management-app/backend/services.json', 'w') as f:
+    with open(cwd + '/services.json', 'w') as f:
         json.dump(services, f)
 
     return jsonify(services), 201
@@ -132,7 +132,7 @@ def delete_service(title):
     if title in services:
         services.pop(title)
 
-        with open(cwd + '/management-app/backend/services.json', 'w') as f:
+        with open(cwd + '/services.json', 'w') as f:
             json.dump(services, f)
 
         return jsonify({'result': True}), 200  # OK
@@ -140,6 +140,7 @@ def delete_service(title):
     abort(404)
 
 if __name__ == "__main__":
-    app.run(debug=True,host='0.0.0.0')
+    app.run(debug=True,host='0.0.0.0', port=8000)
     
+
     
