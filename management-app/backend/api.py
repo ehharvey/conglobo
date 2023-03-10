@@ -1,17 +1,27 @@
 import json
 import os
 import socket
-from flask import Flask, abort, jsonify, request, send_file 
+from flask import Flask, abort, jsonify, request, send_file, send_from_directory 
 import socket
 hostname = socket.gethostname()
 IPAddr = socket.gethostbyname(hostname)
 
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder="../frontend/build/web")
 
 node = {"ip":IPAddr,"health":"Good", "status":True}
 
-cwd = os.getcwd()
+cwd = os.getcwd()   # Doesn't work. Only works when terminal is within the backend directory. 
+
+# Flutter Serving 
+
+@app.route('/')
+def serve_flutter_build():
+    return send_from_directory(app.static_folder, 'index.html')
+
+@app.route('/<path:path>')
+def send_report(path):
+    return send_from_directory(app.static_folder, path)
 
 with open(cwd + '/services.json', 'r') as f:
     services = json.load(f)
