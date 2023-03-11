@@ -5,24 +5,23 @@ import 'package:http/http.dart';
 import '../model/services.dart';
 
 void main(List<String> args) {
-  //getServices();
+  getServices();
 }
 
-const urlPrefix = 'http://localhost:8000';
-
 Future<void> toggleServiceStatus(
-    {required String serviceID, required bool serviceStatus}) async {
+    {required String serviceName, required bool serviceStatus}) async {
   final url = Uri.parse(
-      '$urlPrefix/active-service/toggle?title=$serviceID&status=$serviceStatus');
+      '/active-service/toggle?title=$serviceName&status=$serviceStatus');
   final headers = {"Content-type": "application/json"};
   final response = await post(url, headers: headers);
   //print(response.body);
 }
 
-Future<ServiceStatuses> getServices() async {
-  final url = Uri.parse('$urlPrefix/active-service');
+Future<Services> getServices() async {
+  final url = Uri.parse('/active-service');
   final headers = {"Content-type": "application/json"};
   final response = await get(url, headers: headers);
-  final data = ServiceStatuses.fromJson(jsonDecode(response.body));
+  final data = Services.fromJson(jsonDecode(response.body));
+  print(data.services['Masodon Social Platform']!.description);
   return data;
 }

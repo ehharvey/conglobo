@@ -13,13 +13,13 @@ class MyToggleButton extends StatefulWidget {
 }
 
 class _MyToggleButtonState extends State<MyToggleButton> {
-  bool _isOn = false;
-  ServiceStatuses _serviceStatuses = ServiceStatuses(services: {});
+  bool _isOn = true;
+  Services _serviceStatuses = Services(services: {});
 
   @override
   Widget build(BuildContext context) {
-    final String serviceID = widget.chosenService.replaceAll(' ', '');
-    return FutureBuilder<ServiceStatuses>(
+    final String serviceName = widget.chosenService;
+    return FutureBuilder<Services>(
       future: getServices(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
@@ -29,7 +29,7 @@ class _MyToggleButtonState extends State<MyToggleButton> {
         } else {
           _serviceStatuses = snapshot.data!;
           final bool serviceStatus =
-              _serviceStatuses.services[serviceID]?.status ?? false;
+              _serviceStatuses.services[serviceName]?.status ?? false;
           _isOn = serviceStatus;
           return Container(
             height: 50,
@@ -40,14 +40,13 @@ class _MyToggleButtonState extends State<MyToggleButton> {
               ],
               onPressed: (int index) async {
                 await toggleServiceStatus(
-                    serviceID: serviceID, serviceStatus: _isOn);
+                    serviceName: serviceName, serviceStatus: _isOn);
                 setState(() {
                   _isOn = !_isOn;
                 });
               },
-              selectedColor: Colors.green,
-              color: _isOn ? Colors.grey : Colors.red,
-              fillColor: Colors.transparent,
+              fillColor: Colors.blue,
+              selectedColor: Colors.white,
               borderRadius: BorderRadius.circular(10.0),
               children: const <Widget>[
                 Padding(

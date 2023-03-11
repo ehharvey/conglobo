@@ -1,29 +1,29 @@
-class ServiceStatus {
+class ServiceInfo {
+  final String description;
+  final String github;
   final bool status;
 
-  ServiceStatus({
-    required this.status,
-  });
+  ServiceInfo(
+      {required this.description, required this.github, required this.status});
 
-  factory ServiceStatus.fromJson(Map<String, dynamic> json) {
-    return ServiceStatus(
-      status: json['status'] as bool,
+  factory ServiceInfo.fromJson(Map<String, dynamic> json) {
+    return ServiceInfo(
+      description: json['description'],
+      github: json['github'],
+      status: json['status'],
     );
   }
 }
 
-class ServiceStatuses {
-  final Map<String, ServiceStatus> services;
+class Services {
+  final Map<String, ServiceInfo> services;
 
-  ServiceStatuses({
-    required this.services,
-  });
+  Services({required this.services});
 
-  factory ServiceStatuses.fromJson(Map<String, dynamic> json) {
-    final services = <String, ServiceStatus>{};
-    json.forEach((key, value) {
-      services[key] = ServiceStatus.fromJson(value as Map<String, dynamic>);
-    });
-    return ServiceStatuses(services: services);
+  factory Services.fromJson(Map<String, dynamic> json) {
+    final services = Map<String, ServiceInfo>.fromEntries(json.entries.map(
+        (entry) => MapEntry(entry.key,
+            ServiceInfo.fromJson(Map<String, dynamic>.from(entry.value)))));
+    return Services(services: services);
   }
 }

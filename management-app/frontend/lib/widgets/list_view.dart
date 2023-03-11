@@ -1,3 +1,5 @@
+import 'package:conglobo_app/api/api.dart';
+import 'package:conglobo_app/model/services.dart';
 import 'package:conglobo_app/widgets/toggle_button.dart';
 import 'package:flutter/material.dart';
 
@@ -9,28 +11,37 @@ class MyListView extends StatefulWidget {
 }
 
 class _MyListViewState extends State<MyListView> {
-  final List<String> _services = <String>[
-    'Service 1',
-    'Service 2',
-    'Service 3',
-  ];
-
   int? _selectedIndex;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: ListView.builder(
-        itemCount: _services.length,
-        itemBuilder: (BuildContext context, int index) {
-          return _buildListItem(index);
+      body: FutureBuilder<Services>(
+        future: getServices(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const CircularProgressIndicator();
+          } else if (snapshot.hasError) {
+            return Text('Error: ${snapshot.error}');
+          } else {
+            final servicesObj = snapshot.data;
+            print("THIS IS THE SERVICE OBJECT $servicesObj");
+            return ListView.builder(
+              itemCount: servicesObj!.services.length,
+              itemBuilder: (BuildContext context, int index) {
+                return _buildListItem(index, servicesObj);
+              },
+            );
+          }
         },
       ),
     );
   }
 
-  Widget _buildListItem(int index) {
+  Widget _buildListItem(int index, Services servicesObj) {
     final bool _isExpanded = index == _selectedIndex;
+    final serviceName = servicesObj.services.keys.toList()[index];
+    final serviceInfo = servicesObj.services.values.toList()[index];
 
     return Card(
       child: InkWell(
@@ -42,13 +53,13 @@ class _MyListViewState extends State<MyListView> {
         child: Column(
           children: <Widget>[
             ListTile(
-              title: Text(_services[index]),
-              subtitle: Text('This is the subtitle'),
+              title: Text(serviceName),
+              subtitle: Text(serviceInfo.description),
               leading: _isExpanded
-                  ? Icon(Icons.arrow_drop_up)
-                  : Icon(Icons.arrow_drop_down),
+                  ? const Icon(Icons.arrow_drop_up)
+                  : const Icon(Icons.arrow_drop_down),
               trailing: MyToggleButton(
-                chosenService: _services[index].toLowerCase(),
+                chosenService: serviceName,
               ),
             ),
             _isExpanded ? _buildExpandedDetails() : Container(),
@@ -65,7 +76,7 @@ class _MyListViewState extends State<MyListView> {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Text(
+          const Text(
             'This is the expanded details section. '
             'It could contain more information about the selected item.',
           ),
