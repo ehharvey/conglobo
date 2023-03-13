@@ -6,7 +6,7 @@ import socket
 hostname = socket.gethostname()
 IPAddr = socket.gethostbyname(hostname)
 
-
+port = 8000
 app = Flask(__name__, static_folder="../frontend/build/web")
 
 node = {"ip":IPAddr,"health":"Good", "status":True}
@@ -150,7 +150,7 @@ def delete_service(title):
     abort(404)
 
 if __name__ == "__main__":
-    app.run(debug=True,host='0.0.0.0', port=8000)
+    app.run(debug=True,host='0.0.0.0', port=port)
     
 
     
