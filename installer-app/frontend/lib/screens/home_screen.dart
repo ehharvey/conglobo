@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:frontend/widgets/app_widgets.dart';
+import 'package:disks_desktop/disks_desktop.dart';
 import 'package:frontend/widgets/drop_down_widget.dart';
 import 'package:path/path.dart';
 
@@ -182,6 +183,9 @@ class _HomeScreenState extends State<HomeScreen> {
                         children: [
                           ElevatedButton(
                               onPressed: () async {
+                                final repository = DisksRepository();
+                                final disks = await repository.query;
+                                print(disks[1].devicePath);
                                 String? selectedDirectory = await FilePicker
                                     .platform
                                     .getDirectoryPath();
@@ -200,7 +204,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                         ext == '.iso') {
                                       final file1 = File('$path/user-data.txt');
                                       final file2 = File('$path/meta-data.txt');
-                                      await file1.writeAsString('Testing');
+                                      await file1.writeAsString(_tailScaleKey!);
                                       print('File created');
                                     }
                                   }
