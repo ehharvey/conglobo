@@ -1,0 +1,66 @@
+# A PersistentVolumeClaim (PVC) represents a volume that an app
+# use to store persistent files
+# In the case of VS Code, this will store their workspace files
+# (Right now, PVCs are fulfilled by host storage)
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: vscode-pvc
+spec:
+  accessModes: [ReadWriteMany]
+  resources:
+    requests:
+      storage: 1Gi
+
+# A deployment is an app deployment. It usually is 1+ containers
+# that form a coherent app
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: vscode
+  name: vscode
+spec:
+  selector:
+    matchLabels:
+      app: vscode
+  # replicas refer to how many container replicas to run. For something
+  # like VS Code, this should always be 1
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: vscode
+    spec:
+      # This volume called config is fulfilled by the PVC described above
+      volumes:
+      - name: config
+        persistentVolumeClaim:
+          claimName: vscode-pvc
+      containers:
+      - image: lscr.io/linuxserver/code-server:latest
+        imagePullPolicy: Always
+        name: vscode
+        # Her
+        volumeMounts:
+          - name: config
+            mountPath: /config
+
+# A Service exposes a deployment to the kubernetes network
+# (THIS IS NOT THE SAME AS INGRESS)
+---
+apiVersion: v1
+kind: Service
+metadata:
+ name: vscode
+spec:
+ ports:
+ - port: 80
+   targetPort: 8443
+ selector:
+   app: vscode
+
+
+
