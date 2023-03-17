@@ -28,9 +28,5 @@
 	<string>MainMenu</string>
 	<key>NSPrincipalClass</key>
 	<string>NSApplication</string>
-	<key>NSUserFileReadAccess</key>
-	<string>Please give read access</string>
-	<key>NSUserFileWriteAccess</key>
-	<string>Please give write access</string>
 </dict>
 </plist>
