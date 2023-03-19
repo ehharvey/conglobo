@@ -6,7 +6,7 @@
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: vscode-pvc
+  name: conglobo-pvc
 spec:
   accessModes: [ReadWriteMany]
   resources:
@@ -20,29 +20,29 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   labels:
-    app: vscode
-  name: vscode
+    app: conglobo
+  name: conglobo
 spec:
   selector:
     matchLabels:
-      app: vscode
+      app: conglobo
   # replicas refer to how many container replicas to run. For something
   # like VS Code, this should always be 1
   replicas: 1
   template:
     metadata:
       labels:
-        app: vscode
+        app: conglobo
     spec:
       # This volume called config is fulfilled by the PVC described above
       volumes:
       - name: config
         persistentVolumeClaim:
-          claimName: vscode-pvc
+          claimName: conglobo-pvc
       containers:
-      - image: lscr.io/linuxserver/code-server:latest
+      - image: ehharvey/conglobo-management-app:latest
         imagePullPolicy: Always
-        name: vscode
+        name: conglobo
         # Her
         volumeMounts:
           - name: config
@@ -54,13 +54,13 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
- name: vscode
+ name: conglobo
 spec:
  ports:
- - port: 80
-   targetPort: 8443
+ - port: 80 # THIS SHOULD ALWAYS BE 80
+   targetPort: 8000
  selector:
-   app: vscode
+   app: conglobo
 
 
 

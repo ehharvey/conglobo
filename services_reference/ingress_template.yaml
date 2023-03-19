@@ -4,7 +4,7 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: rewrite
+  name: nginx
   annotations:
   # This rewrites the routes incoming to nginx to start at /
   # e.g., hostname.ca/foobar/test => hostname.ca/test
@@ -19,12 +19,12 @@ spec:
   # We can then add the cert/key to K8s as a secret
   tls:
     - hosts:
-      - desktop-ubuntu.tail6d37c.ts.net
+      - {{ fqdn }}
       secretName: tailscale-tls
 
   # We will only have one host: the full FQDN (from tailscale)
   rules:
-  - host: desktop-ubuntu.tail6d37c.ts.net
+  - host: {{ fqdn }}
     http:
       # These paths will be created and removed by the management API
       # Two options: 
@@ -32,16 +32,9 @@ spec:
       #  - Use a kubernetes API client (preferred)
       paths:
       - pathType: Prefix
-        path: "/vscode"
+        path: "/"
         backend:
           service:
-            name: code-server
-            port:
-              number: 80
-      - pathType: Prefix
-        path: "/test-app"
-        backend:
-          service:
-            name: test-app
+            name: conglobo-management-app
             port:
               number: 80
