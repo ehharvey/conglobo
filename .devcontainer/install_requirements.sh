@@ -1,3 +1,3 @@
 #! /bin/bash
 
-pip install -r ./api/requirements.txt
+pip install -r ./management-app/backend/requirements.txt
