@@ -20,11 +20,11 @@ class _HomeScreenState extends State<HomeScreen> {
   String? _selectedVpn;
   bool _isNetMaker = false;
   String? _tailScaleKey;
+  TextEditingController _tailScaleKeyController = TextEditingController();
   double _progressValue = 0.0;
   Timer? _timer;
-  bool isUbuntu = false;
   final _formKey = GlobalKey<FormState>();
-  var _USBpath;
+  String? _USBpath = 'Path not chosen';
   bool error = false;
   bool installationComplete = false;
 
@@ -53,19 +53,24 @@ class _HomeScreenState extends State<HomeScreen> {
         }
       });
     });
-    if (isUbuntu) {
-      final file1 = File('$_USBpath/user-data.txt');
-      final file2 = File('$_USBpath/meta-data.txt');
-      final String secretFolderPath = '$_USBpath/secret';
-      await Directory(secretFolderPath).create(recursive: true);
-      final secret = File('$secretFolderPath/secret.txt');
-      await secret.writeAsString(_tailScaleKey!);
-      print('File created');
-    } else {
-      setState(() {
-        error = true;
-      });
-    }
+    final file1 = File('$_USBpath/user-data.txt');
+    final file2 = File('$_USBpath/meta-data.txt');
+    final String secretFolderPath = '$_USBpath/secret';
+    await Directory(secretFolderPath).create(recursive: true);
+    final secret = File('$secretFolderPath/secret.txt');
+    await secret.writeAsString(_tailScaleKey!);
+    await file1.create();
+    await file2.create();
+    print('File created');
+  }
+
+  void _resetSetup() {
+    setState(() {
+      _progressValue = 0.0;
+      installationComplete = false;
+      error = false;
+      _tailScaleKeyController.text = '';
+    });
   }
 
   @override
@@ -88,28 +93,33 @@ class _HomeScreenState extends State<HomeScreen> {
               padding: const EdgeInsets.all(20),
               width: double.infinity,
               child: Card(
+                color: const Color.fromARGB(255, 245, 241, 251),
                 elevation: 10,
-                child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        'Choose Ubuntu version',
-                        style: TextStyle(
-                            fontSize: 20.0, fontWeight: FontWeight.bold),
-                      ),
-                      const SizedBox(
-                        height: 20,
-                      ),
-                      DropdownWidget(
-                        options: const ['Jammy', '22.04.2'],
-                        onChanged: (selectedOption) {
-                          setState(() {
-                            _selectedUbuntiVersion = selectedOption;
-                          });
-                          print(_selectedUbuntiVersion);
-                        },
-                      ),
-                    ]),
+                child: Padding(
+                  padding: const EdgeInsets.only(top: 5.0, left: 17),
+                  child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'Choose Ubuntu version',
+                          style: TextStyle(
+                              fontSize: 20.0, fontWeight: FontWeight.bold),
+                        ),
+                        const SizedBox(
+                          height: 20,
+                        ),
+                        DropdownWidget(
+                          hintText: 'Select Ubuntu version',
+                          options: const ['Jammy', '22.04.2'],
+                          onChanged: (selectedOption) {
+                            setState(() {
+                              _selectedUbuntiVersion = selectedOption;
+                            });
+                            print(_selectedUbuntiVersion);
+                          },
+                        ),
+                      ]),
+                ),
               ),
             ),
             Container(
@@ -117,9 +127,11 @@ class _HomeScreenState extends State<HomeScreen> {
               padding: const EdgeInsets.all(20),
               width: double.infinity,
               child: Card(
+                color: const Color.fromARGB(255, 245, 241, 251),
                 elevation: 10,
                 child: Padding(
-                  padding: const EdgeInsets.only(top: 15.0, left: 17),
+                  padding:
+                      const EdgeInsets.only(top: 15.0, left: 17, right: 17),
                   child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -132,6 +144,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           height: 20,
                         ),
                         DropdownWidget(
+                          hintText: 'Select VPN provider',
                           options: const ['TailScale', 'NetMaker'],
                           onChanged: (selectedOption) {
                             setState(() {
@@ -179,6 +192,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             : Form(
                                 key: _formKey,
                                 child: TextFormField(
+                                  controller: _tailScaleKeyController,
                                   decoration: const InputDecoration(
                                     labelText:
                                         'Please enter your TailScale key',
@@ -207,6 +221,7 @@ class _HomeScreenState extends State<HomeScreen> {
               padding: const EdgeInsets.all(20),
               width: double.infinity,
               child: Card(
+                color: const Color.fromARGB(255, 245, 241, 251),
                 elevation: 10,
                 child: Padding(
                   padding: const EdgeInsets.only(left: 17.0, top: 15),
@@ -227,7 +242,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                 onPressed: () async {
                                   final repository = DisksRepository();
                                   final disks = await repository.query;
-                                  print(disks[1].devicePath);
+
                                   String? selectedDirectory = await FilePicker
                                       .platform
                                       .getDirectoryPath();
@@ -237,34 +252,20 @@ class _HomeScreenState extends State<HomeScreen> {
                                   } else {
                                     //print(selectedDirectory);
                                     var path = selectedDirectory;
+                                    setState(() {
+                                      _USBpath = path;
+                                    });
                                     final dir = Directory(path);
                                     final files = await dir.list().toList();
-                                    for (final file in files) {
-                                      final bname = basename(file.path);
-                                      final ext = extension(bname);
-                                      if (bname.startsWith('example') &&
-                                          ext == '.jsx') {
-                                        setState(() {
-                                          _USBpath = path;
-                                          isUbuntu = true;
-                                        });
-                                      }
-                                    }
                                   }
                                 },
                                 child: const Text("Select USB driver")),
                             const SizedBox(
                               width: 20,
                             ),
-                            !isUbuntu
-                                ? const Text(
-                                    'USB folder with ubutu installed not found!',
-                                    style: TextStyle(color: Colors.red),
-                                  )
-                                : const Text(
-                                    'Ubuntu installer found',
-                                    style: TextStyle(color: Colors.green),
-                                  )
+                            Text(
+                              "Chosen USB: $_USBpath",
+                            )
                           ],
                         ),
                       ]),
@@ -296,12 +297,19 @@ class _HomeScreenState extends State<HomeScreen> {
             const SizedBox(
               height: 20,
             ),
-            ElevatedButton(
-              onPressed: () {
-                _startSetup();
-              },
-              child: const Text("BEGIN INSTALLATION"),
-            ),
+            !installationComplete
+                ? ElevatedButton(
+                    onPressed: () {
+                      _startSetup();
+                    },
+                    child: const Text("BEGIN INSTALLATION"),
+                  )
+                : ElevatedButton(
+                    onPressed: () {
+                      _resetSetup();
+                    },
+                    child: const Text("DONE"),
+                  ),
             const SizedBox(
               height: 20,
             ),

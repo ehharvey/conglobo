@@ -3,8 +3,10 @@ import 'package:flutter/material.dart';
 class DropdownWidget extends StatefulWidget {
   final List<String> options;
   final Function(String?) onChanged;
+  final String hintText;
 
-  const DropdownWidget({required this.options, required this.onChanged});
+  const DropdownWidget(
+      {required this.options, required this.onChanged, required this.hintText});
 
   @override
   _DropdownWidgetState createState() => _DropdownWidgetState();
@@ -16,7 +18,8 @@ class _DropdownWidgetState extends State<DropdownWidget> {
   @override
   Widget build(BuildContext context) {
     return DropdownButton<String>(
-      value: _selectionOption,
+      hint: Text(widget.hintText),
+      value: _selectionOption == '' ? 'TailScale' : _selectionOption,
       onChanged: (newValue) {
         setState(() {
           _selectionOption = newValue;
