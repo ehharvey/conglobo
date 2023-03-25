@@ -2,7 +2,7 @@ import json
 import os
 import socket
 from flask import Flask, abort, jsonify, request, send_file, send_from_directory
-import socket
+
 hostname = socket.gethostname()
 IPAddr = socket.gethostbyname(hostname)
 
@@ -11,11 +11,8 @@ app = Flask(__name__, static_folder="../frontend/build/web")
 
 node = {"ip": IPAddr, "health": "Good", "status": True}
 
-with open('services.json', 'r') as f:
-    services = json.load(f)
-
-with open('active-services.json', 'r') as f:
-    active_services = json.load(f)
+with open('conglobo_environment/active-apps.json', 'r') as f:
+    active_apps = json.load(f)
 
 # Flutter Serving -----------------
 
@@ -29,7 +26,7 @@ def serve_flutter_build():
 def send_report(path):
     return send_from_directory(app.static_folder, path)
 
-# API Routes ----------------------
+#  API Routes - ---------------------
 
 
 @app.route("/health-check")
@@ -50,37 +47,37 @@ def deactivate_node():
     node['status'] = False
     return jsonify(node)
 
-# Gets the active-services and their statuses
+# Gets the active-apps and their statuses
 
 
-@app.route('/active-service', methods=['GET'])
-def get_active_services():
-    return jsonify(active_services), 200  # OK
+@app.route('/active-apps', methods=['GET'])
+def get_active_apps():
+    return jsonify(active_apps), 200  # OK
 
-# Change the active status of a service
+# Change the active status of an app
 
 
-@app.route('/active-service/toggle', methods=['POST'])
-def set_active_service():
+@app.route('/active-apps/toggle', methods=['POST'])
+def set_active_app():
     title = request.args.get('title')
     status = request.args.get('status')
 
     if not title or not status:
         abort(400)  # Bad request
 
-    if title not in active_services:
+    if title not in active_apps:
         abort(404)  # Not found
 
     # Toggle the status boolean value
-    if active_services[title]['status']:
-        active_services[title]['status'] = False
+    if active_apps[title]['status']:
+        active_apps[title]['status'] = False
     else:
-        active_services[title]['status'] = True
+        active_apps[title]['status'] = True
 
-    with open('active-services.json', 'w') as f:
-        json.dump(active_services, f)
+    with open('conglobo_environment/active-apps.json', 'w') as f:
+        json.dump(active_apps, f)
 
-    return jsonify(active_services[title]), 200  # OK
+    return jsonify(active_apps[title]), 200  # OK
 
 
 if __name__ == "__main__":

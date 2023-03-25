@@ -3,8 +3,8 @@
         "description": "Run a visual studio instance on your cluster network!",
         "github": "https://github.com/example",
         "status": true,
-        "logs": "String",
-        "version": "String",
+        "logs": "Empty",
+        "version": "1.0",
         "type": "enum",
         "endpoint/url": "String",
         "mounts": [
