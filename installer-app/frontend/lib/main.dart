@@ -14,12 +14,12 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Conglobo Installer',
       theme: ThemeData(
-        scaffoldBackgroundColor: Color.fromARGB(255, 184, 167, 194),
-        primarySwatch: Colors.purple,
+        scaffoldBackgroundColor: Color.fromARGB(255, 255, 191, 155),
+        primarySwatch: Colors.brown,
         elevatedButtonTheme: ElevatedButtonThemeData(
             style: ButtonStyle(
-                backgroundColor:
-                    MaterialStateProperty.all<Color>(Colors.purpleAccent),
+                backgroundColor: MaterialStateProperty.all<Color>(
+                    Color.fromARGB(255, 180, 96, 96)),
                 shape: MaterialStateProperty.all<RoundedRectangleBorder>(
                     RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(18.0),

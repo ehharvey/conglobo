@@ -3,10 +3,9 @@ import 'dart:io';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
-import 'package:frontend/widgets/app_widgets.dart';
+import 'package:frontend/functions/function.dart';
 import 'package:disks_desktop/disks_desktop.dart';
 import 'package:frontend/widgets/drop_down_widget.dart';
-import 'package:path/path.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -16,7 +15,6 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  String? _selectedUbuntiVersion;
   String? _selectedVpn;
   bool _isNetMaker = false;
   String? _tailScaleKey;
@@ -53,14 +51,18 @@ class _HomeScreenState extends State<HomeScreen> {
         }
       });
     });
-    final file1 = File('$_USBpath/user-data.txt');
-    final file2 = File('$_USBpath/meta-data.txt');
+
     final String secretFolderPath = '$_USBpath/secret';
+    final String noClourPath = '$_USBpath/nocloud';
     await Directory(secretFolderPath).create(recursive: true);
+    await Directory(noClourPath).create(recursive: true);
     final secret = File('$secretFolderPath/secret.txt');
     await secret.writeAsString(_tailScaleKey!);
-    await file1.create();
-    await file2.create();
+    final userData = File('$noClourPath/user-data');
+    final metaData = File('$noClourPath/meta-data');
+    await userData.create();
+    await metaData.create();
+    modifyGrub(_USBpath!);
     print('File created');
   }
 
@@ -70,6 +72,7 @@ class _HomeScreenState extends State<HomeScreen> {
       installationComplete = false;
       error = false;
       _tailScaleKeyController.text = '';
+      _timer?.cancel();
     });
   }
 
@@ -89,45 +92,11 @@ class _HomeScreenState extends State<HomeScreen> {
         child: Column(
           children: [
             Container(
-              height: 150,
-              padding: const EdgeInsets.all(20),
-              width: double.infinity,
-              child: Card(
-                color: const Color.fromARGB(255, 245, 241, 251),
-                elevation: 10,
-                child: Padding(
-                  padding: const EdgeInsets.only(top: 5.0, left: 17),
-                  child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text(
-                          'Choose Ubuntu version',
-                          style: TextStyle(
-                              fontSize: 20.0, fontWeight: FontWeight.bold),
-                        ),
-                        const SizedBox(
-                          height: 20,
-                        ),
-                        DropdownWidget(
-                          hintText: 'Select Ubuntu version',
-                          options: const ['Jammy', '22.04.2'],
-                          onChanged: (selectedOption) {
-                            setState(() {
-                              _selectedUbuntiVersion = selectedOption;
-                            });
-                            print(_selectedUbuntiVersion);
-                          },
-                        ),
-                      ]),
-                ),
-              ),
-            ),
-            Container(
               height: 300,
               padding: const EdgeInsets.all(20),
               width: double.infinity,
               child: Card(
-                color: const Color.fromARGB(255, 245, 241, 251),
+                color: const Color.fromARGB(255, 255, 244, 224),
                 elevation: 10,
                 child: Padding(
                   padding:
@@ -221,7 +190,7 @@ class _HomeScreenState extends State<HomeScreen> {
               padding: const EdgeInsets.all(20),
               width: double.infinity,
               child: Card(
-                color: const Color.fromARGB(255, 245, 241, 251),
+                color: const Color.fromARGB(255, 255, 244, 224),
                 elevation: 10,
                 child: Padding(
                   padding: const EdgeInsets.only(left: 17.0, top: 15),
@@ -242,6 +211,18 @@ class _HomeScreenState extends State<HomeScreen> {
                                 onPressed: () async {
                                   final repository = DisksRepository();
                                   final disks = await repository.query;
+
+                                  for (int i = 0; i < disks.length; i++) {
+                                    if (disks[i].busType == "USB") {
+                                      for (final mountPoint
+                                          in disks[i].mountpoints) {
+                                        final dir = Directory(mountPoint.path);
+                                        print(dir);
+                                        //final files = await dir.list().toList();
+                                      }
+                                      print(disks[i].description);
+                                    }
+                                  }
 
                                   String? selectedDirectory = await FilePicker
                                       .platform
@@ -287,12 +268,14 @@ class _HomeScreenState extends State<HomeScreen> {
                     child: LinearProgressIndicator(
                       value: _progressValue,
                       backgroundColor: Colors.grey,
-                      valueColor: AlwaysStoppedAnimation<Color>(Colors.green),
+                      valueColor: const AlwaysStoppedAnimation<Color>(
+                          Color.fromARGB(255, 33, 107, 37)),
                     ),
                   )
                 : const Text(
                     "Installation completed sucessfully!",
-                    style: TextStyle(color: Colors.green, fontSize: 20),
+                    style: TextStyle(
+                        color: Color.fromARGB(255, 33, 107, 37), fontSize: 20),
                   ),
             const SizedBox(
               height: 20,
