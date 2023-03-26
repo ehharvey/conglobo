@@ -2,17 +2,22 @@ import json
 import os
 import socket
 from flask import Flask, abort, jsonify, request, send_file, send_from_directory
+from app_management import AppManager, AppVolume, App, AppContainer
+from conglobo_environment import CongloboEnvironment
 
 hostname = socket.gethostname()
 IPAddr = socket.gethostbyname(hostname)
+Config = CongloboEnvironment()
 
 port = 8000
 app = Flask(__name__, static_folder="../frontend/build/web")
 
 node = {"ip": IPAddr, "health": "Good", "status": True}
 
-with open('conglobo_environment/active-apps.json', 'r') as f:
+with open('config/active-apps.json', 'r') as f:
     active_apps = json.load(f)
+
+app_manager = AppManager(Config.config_directory)
 
 # Flutter Serving -----------------
 
@@ -52,29 +57,37 @@ def deactivate_node():
 
 @app.route('/active-apps', methods=['GET'])
 def get_active_apps():
+    apps = app_manager.get_apps()
+    active_apps = {app.name: {"status": app.is_running()} for app in apps}
     return jsonify(active_apps), 200  # OK
 
 # Change the active status of an app
 
 
-@app.route('/active-apps/toggle', methods=['POST'])
+@app.route("/active-apps/toggle", methods=["POST"])
 def set_active_app():
-    title = request.args.get('title')
-    status = request.args.get('status')
+    title = request.args.get("title")
+    status = request.args.get("status")
 
-    if not title or not status:
+    if not title or status not in ["true", "false"]:
         abort(400)  # Bad request
 
-    if title not in active_apps:
-        abort(404)  # Not found
+    # Get app by name from AppManager
+    app = app_manager.get_app(title)
+    if not app:
+        abort(404)
 
-    # Toggle the status boolean value
-    if active_apps[title]['status']:
-        active_apps[title]['status'] = False
+    # Set app status based on request
+    if status == "true":
+        if not app_manager.get_app(title):
+            app_manager.add_app(app)
     else:
-        active_apps[title]['status'] = True
+        app_manager.delete_app(name=title)
 
-    with open('conglobo_environment/active-apps.json', 'w') as f:
+    # Update active_apps dictionary and save to file
+    apps = app_manager.get_apps()
+    active_apps = {app.name: {"status": app.is_running()} for app in apps}
+    with open('config/active-apps.json', 'w') as f:
         json.dump(active_apps, f)
 
     return jsonify(active_apps[title]), 200  # OK
