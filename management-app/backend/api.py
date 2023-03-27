@@ -42,7 +42,10 @@ try:
     manager.delete_app(test_app.name)
 except:
     pass
-manager.add_app(test_app)
+try:
+    manager.add_app(test_app)
+except:
+    pass
 
 
 # Flutter Serving
