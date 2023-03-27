@@ -13,7 +13,7 @@ import conglobo_environment
 
 hostname = socket.gethostname()
 IPAddr = socket.gethostbyname(hostname)
-config = conglobo_environment.getOsConfig()
+config = conglobo_environment.CongloboEnvironment()
 
 port = 8000
 app = Flask(__name__, static_folder="../frontend/build/web")
@@ -23,7 +23,6 @@ node = {"ip": IPAddr, "health": "Good", "status": True}
 with open("config/active-apps.json", "r") as f:
     active_apps = json.load(f)
 
-app_manager = AppManager(config.config_directory)
 
 # App Management demo
 manager = AppManager(config)
@@ -86,7 +85,7 @@ def deactivate_node():
 
 @app.route("/active-apps", methods=["GET"])
 def get_active_apps():
-    apps = app_manager.get_apps()
+    apps = manager.get_apps()
     active_apps = {app.name: {"status": app.is_running()} for app in apps}
     return jsonify(active_apps), 200  # OK
 
