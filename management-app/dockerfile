@@ -13,4 +13,6 @@ RUN pip install waitress
 WORKDIR /managment-app/backend
 RUN pip install waitress
 
-CMD ["waitress-serve", "--listen=*:8000", "api:app"]
+EXPOSE 80/tcp
+
+CMD ["waitress-serve", "--listen=*:80", "api:app"]
