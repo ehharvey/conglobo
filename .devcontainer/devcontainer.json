@@ -20,11 +20,13 @@
 	// "customizations": {},
 	// Uncomment to connect as root instead. More info: https://aka.ms/dev-containers-non-root.
 	// "remoteUser": "root"
+	"postStartCommand": "cd management-app/frontend && flutter clean && cd ../.. && ./.devcontainer/k8s_setup.sh",
 	"postAttachCommand": "./.devcontainer/install_requirements.sh",
 	"customizations": {
 		"vscode": {
 			"extensions": [
-				"ms-python.python"
+				"ms-python.python",
+				"ms-kubernetes-tools.vscode-kubernetes-tools"
 			]
 		}
 	}

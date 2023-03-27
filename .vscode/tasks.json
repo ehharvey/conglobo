@@ -4,7 +4,7 @@
     "version": "2.0.0",
     "tasks": [
         {
-            "label": "Forward Kubernetes to port 8080",
+            "label": "Forward Kubernetes Ingress to port 8080",
             "type": "shell",
             "command": "kubectl port-forward --pod-running-timeout=24h -n ingress-nginx service/ingress-nginx-controller 8080:80",
             "isBackground": true
@@ -26,12 +26,28 @@
             "options": {
                 "cwd": "${workspaceFolder}/management-app/"
             },
-            "command": "docker build -t conglobo-management-app .",
+            "command": "eval $(minikube docker-env) && docker build -t conglobo-management-app .",
             "problemMatcher": [],
             "group": {
                 "kind": "build",
                 "isDefault": false
             }
         },
+        {
+            "label": "Deploy Conglobo Management App",
+            "type": "shell",
+            "dependsOn": [
+                "Build Conglobo Management Docker Image",
+                "Forward Kubernetes Ingress to port 8080"
+            ],
+            "options": {
+                "cwd": "management-app/minikube-deployment"
+            },
+            "command": "kubectl delete -f deployment.yaml && kubectl apply -f config.yaml && kubectl apply -f deployment.yaml",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
+        }
     ]
 }

@@ -1,0 +1,23 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: conglobo-config
+data:
+  config: |
+    {
+      "service1": {
+          "title": "Masodon Social Platform",
+          "description": "description", 
+          "github" : "https://github.com/example"
+      },
+      "service2": {
+          "title": "Visual Studio in Browser",
+          "description": "description", 
+          "github" : "https://github.com/example"
+      },
+      "service3": {
+          "title": "Tensorflow Machine Learning",
+          "description": "description", 
+          "github" : "https://github.com/example"
+      }
+    }

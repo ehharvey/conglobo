@@ -7,7 +7,7 @@ test_app = App(
     # URL is messy right now because it includes regex
     # that nginx can use to rewrite the route strings
     # TODO: Perform this on app-side?
-    url_path=r"/testapp(/|$)(.*)",
+    url_path=r"/testapp(.*)",
     container=AppContainer(image="strm/helloworld-http", volumes=[], port=80),
 )
 

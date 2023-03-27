@@ -1,0 +1,39 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: conglobo
+  name: conglobo
+spec:
+  selector:
+    matchLabels:
+      app: conglobo
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: conglobo
+    spec:
+      volumes:
+        - name: conglobo-persistent-storage
+          persistentVolumeClaim:
+            claimName: conglobo-persistent-storage
+        - name: conglobo-config
+          configMap:
+            name: conglobo-config
+            items:
+              - key: config
+                path: services.json
+      serviceAccountName: conglobo-service-account
+      containers:
+        - image: conglobo-management-app
+          imagePullPolicy: Never
+          name: conglobo
+          # Her
+          volumeMounts:
+            - name: conglobo-persistent-storage
+              mountPath: /persistent-storage
+            - name: conglobo-config
+              mountPath: /config
+              readOnly: true

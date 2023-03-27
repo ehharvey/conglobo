@@ -5,12 +5,12 @@ from pydantic import BaseModel, PositiveInt
 
 
 class CongloboEnvironment(BaseModel):
+    persistent_storage: Path = "/persistent-storage"
     config_directory: Path = "/config"
     port: PositiveInt = 80
     ingress_name: str = "nginx"
     namespace_name: str = "default"
-    ingress_hostname: str = "desktop-ubuntu.tail6d37c.ts.net"
-    kube_config_path: Optional[Path] = "~/.kube/config.yaml"
+    kube_config_path: Optional[Path] = None
 
     class Config:
         allow_mutation = False

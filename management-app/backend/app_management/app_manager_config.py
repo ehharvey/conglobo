@@ -28,16 +28,11 @@ class AppManagerConfig:
         spec: client.V1IngressSpec = self.ingress.spec
         rules: List[client.V1IngressRule] = spec.rules
 
-        host_rules = [r for r in rules if r.host == self.config.ingress_hostname]
+        rule_result: client.V1IngressRule = rules[0]
+        http_result: client.V1HTTPIngressRuleValue = rule_result.http
+        paths_result: List[client.V1HTTPIngressPath] = http_result.paths
 
-        if len(host_rules) != 1:
-            raise Exception("# of rules matching the node hostname != 1")
-        else:
-            rule_result: client.V1IngressRule = host_rules[0]
-            http_result: client.V1HTTPIngressRuleValue = rule_result.http
-            paths_result: List[client.V1HTTPIngressPath] = http_result.paths
-
-            return paths_result
+        return paths_result
 
     @property
     def current_paths_dict(self) -> Dict[str, client.V1HTTPIngressPath]:
@@ -51,10 +46,6 @@ class AppManagerConfig:
             url_path = hip.path
             name = hip.backend.service.name
             port = hip.backend.service.port.number
-
-            service: client.V1Service = self.core_api.read_namespaced_service(
-                name=name, namespace=self.config.namespace_name
-            )
 
             deployment: client.V1Deployment = self.apps_api.read_namespaced_deployment(
                 name=name, namespace=self.config.namespace_name
@@ -89,6 +80,7 @@ class AppManagerConfig:
                         storage=pvcs[vm.name].spec.resources.requests["storage"],
                     )
                     for vm in v1_containers[0].volume_mounts
+                    if vm.name in pvcs
                 ]
                 if pvcs
                 else [],
