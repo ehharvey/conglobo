@@ -5,8 +5,8 @@ from pydantic import BaseModel, PositiveInt
 
 
 class CongloboEnvironment(BaseModel):
-    persistent_storage: Path = "/persistent-storage"
-    config_directory: Path = "/config"
+    persistent_storage: Path = Path("/persistent-storage")
+    config_directory: Path = Path("/config")
     port: PositiveInt = 80
     ingress_name: str = "nginx"
     namespace_name: str = "default"
