@@ -6,7 +6,7 @@ from pydantic import BaseModel, PositiveInt
 
 class CongloboEnvironment(BaseModel):
     config_directory: Path = "/config"
-    port: PositiveInt = 8000
+    port: PositiveInt = 80
     ingress_name: str = "nginx"
     namespace_name: str = "default"
     ingress_hostname: str = "desktop-ubuntu.tail6d37c.ts.net"

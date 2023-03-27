@@ -1,0 +1,34 @@
+apiVersion: v1
+items:
+- apiVersion: networking.k8s.io/v1
+  kind: Ingress
+  metadata:
+    annotations:
+      kubectl.kubernetes.io/last-applied-configuration: |
+        {"apiVersion":"networking.k8s.io/v1","kind":"Ingress","metadata":{"annotations":{"nginx.ingress.kubernetes.io/rewrite-target":"/$2"},"name":"nginx","namespace":"default"},"spec":{"ingressClassName":"nginx","rules":[{"http":{"paths":[{"backend":{"service":{"name":"test-app","port":{"number":80}}},"path":"/testapp(/|$)(.*)","pathType":"Prefix"}]}}]}}
+      nginx.ingress.kubernetes.io/rewrite-target: /$2
+    creationTimestamp: "2023-03-22T22:21:45Z"
+    generation: 1
+    name: nginx
+    namespace: default
+    resourceVersion: "1633"
+    uid: d7ad8f35-1215-45a6-9eae-a3cf98732e0c
+  spec:
+    ingressClassName: nginx
+    rules:
+    - http:
+        paths:
+        - backend:
+            service:
+              name: test-app
+              port:
+                number: 80
+          path: /testapp(/|$)(.*)
+          pathType: Prefix
+  status:
+    loadBalancer:
+      ingress:
+      - ip: 192.168.49.2
+kind: List
+metadata:
+  resourceVersion: ""

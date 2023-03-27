@@ -1,0 +1,37 @@
+{
+    // See https://go.microsoft.com/fwlink/?LinkId=733558
+    // for the documentation about the tasks.json format
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Forward Kubernetes to port 8080",
+            "type": "shell",
+            "command": "kubectl port-forward --pod-running-timeout=24h -n ingress-nginx service/ingress-nginx-controller 8080:80",
+            "isBackground": true
+        },
+        {
+            "label": "Build Conglobo Management Frontend",
+            "type": "shell",
+            "options": {
+                "cwd": "${workspaceFolder}/management-app/frontend"
+            },
+            "command": "flutter build web"
+        },
+        {
+            "label": "Build Conglobo Management Docker Image",
+            "type": "shell",
+            "dependsOn": [
+                "Build Conglobo Management Frontend"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}/management-app/"
+            },
+            "command": "docker build -t conglobo-management-app .",
+            "problemMatcher": [],
+            "group": {
+                "kind": "build",
+                "isDefault": false
+            }
+        },
+    ]
+}
