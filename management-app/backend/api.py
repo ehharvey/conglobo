@@ -1,50 +1,30 @@
-import json
 import os
-from pathlib import Path
 import socket
-from flask import Flask, abort, jsonify, request, send_file, send_from_directory
-import socket
-
-from app_management.app_container import AppContainer
-from app_management.app import App
-
-from app_management.app_manager import AppManager
-import conglobo_environment
+import json
+from flask import Flask, abort, jsonify, request, send_from_directory
+from app_management import AppManager, AppVolume, App, AppContainer
+from conglobo_environment import CongloboEnvironment
+import yaml
 
 hostname = socket.gethostname()
 IPAddr = socket.gethostbyname(hostname)
-config = conglobo_environment.CongloboEnvironment()
+Config_Loc = (
+    "/workspaces/GoogleSolutionChallenge2023/management-app/minikube/config.yaml"
+)
 
 port = 8000
 app = Flask(__name__, static_folder="../frontend/build/web")
 
 node = {"ip": IPAddr, "health": "Good", "status": True}
 
-with open("config/active-apps.json", "r") as f:
-    active_apps = json.load(f)
+with open(Config_Loc, "r") as f:
+    config = yaml.safe_load(f)
 
+active_apps = config["data"]["config"]
 
-# App Management demo
-manager = AppManager(config)
-test_app = App(
-    name="testapp",
-    # URL is messy right now because it includes regex
-    # that nginx can use to rewrite the route strings
-    # TODO: Perform this on app-side?
-    url_path=r"/testapp(.*)",
-    container=AppContainer(image="strm/helloworld-http", volumes=[], port=80),
-)
-try:
-    manager.delete_app(test_app.name)
-except:
-    pass
-try:
-    manager.add_app(test_app)
-except:
-    pass
+app_manager = AppManager(CongloboEnvironment())
 
-
-# Flutter Serving
+# Flutter Serving -----------------
 
 
 @app.route("/")
@@ -81,19 +61,58 @@ def deactivate_node():
 
 
 # Gets the active-apps and their statuses
-
-
 @app.route("/active-apps", methods=["GET"])
 def get_active_apps():
-    apps = manager.get_apps()
-    active_apps = {app.name: {"status": app.is_running()} for app in apps}
-    return jsonify(active_apps), 200  # OK
+    with open(Config_Loc, "r") as f:
+        active_apps_yaml = yaml.safe_load(f)["data"]["config"]
+
+    active_apps = yaml.safe_load(active_apps_yaml)
+    active_apps_json = json.dumps(active_apps)
+
+    return active_apps_json, 200
 
 
-# Gets all the avaliable services in the services file
-@app.route("/services", methods=["GET"])
-def get_services():
-    return (config.config_directory / "services.json").read_text()
+# Change the active status of an app
+
+
+@app.route("/active-apps/toggle", methods=["POST"])
+def set_active_app():
+    title = request.args.get("title")
+    status = request.args.get("status")
+
+    if not title or not status:
+        abort(400)  # Bad request
+
+    active_apps = config["data"]["config"]
+
+    # Get matching app by title
+    matching_dict = next((d for d in active_apps if d.get(title)), None)
+    if not matching_dict:
+        abort(404)  # Not found
+
+    # Toggle the status boolean value
+    if matching_dict[title]["status"]:
+        matching_dict[title]["status"] = False
+    else:
+        matching_dict[title]["status"] = True
+
+    with open(Config_Loc, "w") as f:
+        active_apps_yaml = yaml.dump({"config": active_apps})
+        f.write(active_apps_yaml)
+
+    # # Get app by name from AppManager
+    # app = app_manager.get_app(title)
+    # if not app:
+    #     abort(404)
+
+    # # Set app status based on request
+    # if status == "true":
+    #     if not app_manager.get_app(title):
+    #         app_manager.add_app(app)
+    # else:
+    #     app_manager.delete_app(name=title)
+
+    return jsonify({"status": "success"}), 200
 
 
 if __name__ == "__main__":

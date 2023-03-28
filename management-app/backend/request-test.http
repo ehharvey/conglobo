@@ -10,8 +10,8 @@ Host: localhost:8000
 
 ### Sets the active service
 
-POST /active-apps/toggle?title=Masodon+Social+Platform&status=true HTTP/1.1
-Host: localhost:5000
+POST /active-apps/toggle?title=Visual+Studio+in+Browser&status=true HTTP/1.1
+Host: localhost:8000
 
 ### Add an active Service
 
