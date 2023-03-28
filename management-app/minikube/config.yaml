@@ -1,17 +1,11 @@
 apiVersion: v1
+data:
+  config:
+    '{"Visual Studio in Browser": {"description": "Run a visual studio instance
+    on your cluster network!", "github": "https://github.com/example", "status": false,
+    "logs": "Empty", "version": "1.0", "type": "enum", "endpoint/url": "String", "mounts":
+    ["List of paths to be mounted"], "httpPort": "port used by HTTP of service (usually
+    80/443)"}}'
 kind: ConfigMap
 metadata:
   name: conglobo-config
-data:
-  config: |-
-    Visual Studio in Browser:
-      description: Run a visual studio instance on your cluster network!
-      github: https://github.com/example
-      status: true
-      logs: Empty
-      version: 1.0
-      type: enum
-      endpoint/url: String
-      mounts:
-        - List of paths to be mounted
-      httpPort: port used by HTTP of service (usually 80/443)

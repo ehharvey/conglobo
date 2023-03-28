@@ -80,39 +80,22 @@ def set_active_app():
     title = request.args.get("title")
     status = request.args.get("status")
 
-    if not title or not status:
-        abort(400)  # Bad request
+    with open(Config_Loc, "r") as f:
+        data = yaml.safe_load(f)
 
-    active_apps = config["data"]["config"]
+    # Update the status for the app with matching title
+    app_config = data["data"]["config"]
+    active_apps = json.loads(app_config)
 
-    # Get matching app by title
-    matching_dict = next((d for d in active_apps if d.get(title)), None)
-    if not matching_dict:
-        abort(404)  # Not found
+    if title in active_apps:
+        active_apps[title]["status"] = status == "true"
 
-    # Toggle the status boolean value
-    if matching_dict[title]["status"]:
-        matching_dict[title]["status"] = False
-    else:
-        matching_dict[title]["status"] = True
-
+    # Write the updated data to the YAML file
     with open(Config_Loc, "w") as f:
-        active_apps_yaml = yaml.dump({"config": active_apps})
-        f.write(active_apps_yaml)
+        data["data"]["config"] = json.dumps(active_apps)
+        yaml.dump(data, f)
 
-    # # Get app by name from AppManager
-    # app = app_manager.get_app(title)
-    # if not app:
-    #     abort(404)
-
-    # # Set app status based on request
-    # if status == "true":
-    #     if not app_manager.get_app(title):
-    #         app_manager.add_app(app)
-    # else:
-    #     app_manager.delete_app(name=title)
-
-    return jsonify({"status": "success"}), 200
+    return active_apps[title]
 
 
 if __name__ == "__main__":
