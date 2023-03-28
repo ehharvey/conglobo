@@ -20,7 +20,22 @@ node = {"ip": IPAddr, "health": "Good", "status": True}
 with open(Config_Loc, "r") as f:
     config = yaml.safe_load(f)
 
-active_apps = config["data"]["config"]
+app_config = json.loads(config["data"]["config"])
+app_array = []
+
+# Iterate over the apps in the config
+for title, app_data in app_config.items():
+    # Create a new App object with the app data
+    app = App(
+        name=title,
+        url_path=r"/{0}(.*)".format(title.lower()),
+        container=AppContainer(
+            image="your/image", volumes=[], port=app_data.get("httpPort", 80)
+        ),
+    )
+
+    # Add the app to the array
+    app_array.append(app)
 
 app_manager = AppManager(CongloboEnvironment())
 
@@ -89,6 +104,13 @@ def set_active_app():
 
     if title in active_apps:
         active_apps[title]["status"] = status == "true"
+
+        for app in app_array:
+            if app.name == title:
+                if app_config[title]["status"]:
+                    app_manager.add_app(app)
+                else:
+                    app_manager.delete_app(name=title)
 
     # Write the updated data to the YAML file
     with open(Config_Loc, "w") as f:
