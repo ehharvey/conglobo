@@ -1,8 +1,14 @@
 import json
 import os
+from pathlib import Path
 import socket
 from flask import Flask, abort, jsonify, request, send_file, send_from_directory
 import socket
+
+from app_management.app_container import AppContainer
+from app_management.app import App
+
+from app_management.app_manager import AppManager
 import conglobo_environment
 
 hostname = socket.gethostname()
@@ -21,6 +27,26 @@ with open("services.json", "r") as f:
 
 with open("active-services.json", "r") as f:
     active_services = json.load(f)
+
+# App Management demo
+manager = AppManager(config)
+test_app = App(
+    name="testapp",
+    # URL is messy right now because it includes regex
+    # that nginx can use to rewrite the route strings
+    # TODO: Perform this on app-side?
+    url_path=r"/testapp(.*)",
+    container=AppContainer(image="strm/helloworld-http", volumes=[], port=80),
+)
+try:
+    manager.delete_app(test_app.name)
+except:
+    pass
+try:
+    manager.add_app(test_app)
+except:
+    pass
+
 
 # Flutter Serving
 
@@ -118,44 +144,7 @@ def delete_active_service():
 # Gets all the avaliable services in the services file
 @app.route("/services", methods=["GET"])
 def get_services():
-    with open("services.json", "r") as f:
-        data = json.load(f)
-    return jsonify(data)
-
-
-# Addds a new service to the services file
-@app.route("/services", methods=["POST"])
-def add_service():
-    if not request.json or "title" not in request.json:
-        abort(400)
-
-    with open("active-services.json", "r") as f:
-        services = json.load(f)
-
-    new_service = {
-        "title": request.json["title"],
-        "description": request.json.get("description", ""),
-    }
-    services[new_service["title"]] = new_service
-
-    with open("services.json", "w") as f:
-        json.dump(services, f)
-
-    return jsonify(services), 201
-
-
-# Removes a service from the services file
-@app.route("/services/<string:title>", methods=["DELETE"])
-def delete_service(title):
-    if title in services:
-        services.pop(title)
-
-        with open("services.json", "w") as f:
-            json.dump(services, f)
-
-        return jsonify({"result": True}), 200  # OK
-
-    abort(404)
+    return (config.config_directory / "services.json").read_text()
 
 
 if __name__ == "__main__":
