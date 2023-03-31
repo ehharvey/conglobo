@@ -40,6 +40,8 @@ class AppManagerConfig:
 
     @property
     def active_apps(self) -> List[App]:
+        app_configs_dict = {a.name: a for a in self.config.app_configs}
+
         result = []
 
         for hip in self.current_paths:
@@ -69,7 +71,11 @@ class AppManagerConfig:
                 c for c in deployment.spec.template.spec.containers
             ]
 
-            if len(v1_containers) != 1 or "conglobo" in name:
+            if (
+                len(v1_containers) != 1
+                or "conglobo" in name
+                or name not in app_configs_dict
+            ):
                 continue
 
             app_container = AppContainer(
@@ -94,6 +100,9 @@ class AppManagerConfig:
                     container=app_container,
                     replicas=replicas,
                     active=True,
+                    description=app_configs_dict[name].description,
+                    displayName=app_configs_dict[name].displayName,
+                    displayUrlPath=app_configs_dict[name].displayUrlPath,
                 )
             )
 

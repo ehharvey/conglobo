@@ -28,9 +28,10 @@ class Apps {
 
   Apps({required this.services});
 
-  factory Apps.fromJson(List<AppInfo> json) {
+  factory Apps.fromJson(List<dynamic> json) {
+    print(json);
     final services = Map<String, AppInfo>.fromEntries(
-        json.map((entry) => MapEntry(entry.name, entry)));
+        json.map((entry) => MapEntry(entry['name'], AppInfo.fromJson(entry))));
     return Apps(services: services);
   }
 }

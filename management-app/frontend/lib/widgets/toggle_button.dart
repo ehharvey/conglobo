@@ -31,12 +31,13 @@ class _MyToggleButtonState extends State<MyToggleButton> {
           final bool serviceStatus =
               _serviceStatuses.services[serviceName]?.active ?? false;
           _isOn = serviceStatus;
+          print(_isOn);
           return Container(
             height: 50,
             child: ToggleButtons(
               isSelected: <bool>[
-                _isOn,
                 !_isOn,
+                _isOn,
               ],
               onPressed: (int index) async {
                 if (_isOn) {

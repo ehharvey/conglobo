@@ -9,7 +9,11 @@ import socket
 from app_management.app_container import AppContainer
 from app_management.app import App
 
-from app_management.app_manager import AppAlreadyActivated, AppManager
+from app_management.app_manager import (
+    AppAlreadyActivated,
+    AppAlreadyDeactivated,
+    AppManager,
+)
 import conglobo_environment
 
 hostname = socket.gethostname()
@@ -48,8 +52,10 @@ def get_apps():
 def deactivate_app(app_name):
     try:
         manager.deactivate_app(app_name)
-    except:
-        abort(404)
+    except AppAlreadyDeactivated:
+        return jsonify({"message": "App already deactivated"}), 400
+    except Exception as e:
+        return jsonify({"message": f"Could not deactivate app: {e}"}), 500
 
     return jsonify({"message": "App deleted"}), 200
 

@@ -1,5 +1,5 @@
 from typing import List
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from pathlib import Path
 
 from kubernetes import client
@@ -8,10 +8,13 @@ from app_management.app_container import AppContainer
 
 
 class AppDefinition(BaseModel):
+    displayName: str
+    displayUrlPath: str
     name: str
     url_path: str
     container: AppContainer
     replicas: int = 1
+    description: str
 
     @property
     def http_ingress_path(self) -> client.V1HTTPIngressPath:
