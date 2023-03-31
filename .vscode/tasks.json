@@ -14,9 +14,6 @@
         {
             "label": "Build Conglobo Management Docker Image",
             "type": "shell",
-            "dependsOn": [
-                "Build Conglobo Management Frontend"
-            ],
             "options": {
                 "cwd": "${workspaceFolder}/management-app/"
             },
@@ -36,7 +33,7 @@
             "options": {
                 "cwd": "${workspaceFolder}/management-app/minikube"
             },
-            "command": "kubectl delete --ignore-not-found=true -f deployment.yaml && kubectl apply -f config.yaml && kubectl apply -f deployment.yaml && kubectl apply -f k8s.yaml",
+            "command": "kubectl delete --ignore-not-found=true -f backend-deployment.yaml && kubectl apply -f backend-config.yaml && kubectl apply -f backend-deployment.yaml && kubectl apply -f k8s.yaml",
             "group": {
                 "kind": "build",
                 "isDefault": false

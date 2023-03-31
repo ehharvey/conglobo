@@ -1,5 +1,5 @@
 import 'package:conglobo_app/api/api.dart';
-import 'package:conglobo_app/model/services.dart';
+import 'package:conglobo_app/model/apps.dart';
 import 'package:conglobo_app/widgets/toggle_button.dart';
 import 'package:flutter/material.dart';
 
@@ -16,20 +16,20 @@ class _MyListViewState extends State<MyListView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: FutureBuilder<Services>(
-        future: getServices(),
+      body: FutureBuilder<Apps>(
+        future: getApps(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const CircularProgressIndicator();
           } else if (snapshot.hasError) {
             return Text('Error: ${snapshot.error}');
           } else {
-            final servicesObj = snapshot.data;
-            print("THIS IS THE SERVICE OBJECT $servicesObj");
+            final appsObj = snapshot.data;
+
             return ListView.builder(
-              itemCount: servicesObj!.services.length,
+              itemCount: appsObj!.services.length,
               itemBuilder: (BuildContext context, int index) {
-                return _buildListItem(index, servicesObj);
+                return _buildListItem(index, appsObj);
               },
             );
           }
@@ -38,10 +38,10 @@ class _MyListViewState extends State<MyListView> {
     );
   }
 
-  Widget _buildListItem(int index, Services servicesObj) {
+  Widget _buildListItem(int index, Apps appsObj) {
     final bool _isExpanded = index == _selectedIndex;
-    final serviceName = servicesObj.services.keys.toList()[index];
-    final serviceInfo = servicesObj.services.values.toList()[index];
+    final appName = appsObj.services.keys.toList()[index];
+    final appInfo = appsObj.services.values.toList()[index];
 
     return Card(
       child: InkWell(
@@ -53,13 +53,13 @@ class _MyListViewState extends State<MyListView> {
         child: Column(
           children: <Widget>[
             ListTile(
-              title: Text(serviceName),
-              subtitle: Text(serviceInfo.description),
+              title: Text(appName),
+              subtitle: Text(appInfo.description),
               leading: _isExpanded
                   ? const Icon(Icons.arrow_drop_up)
                   : const Icon(Icons.arrow_drop_down),
               trailing: MyToggleButton(
-                chosenService: serviceName,
+                chosenService: appName,
               ),
             ),
             _isExpanded ? _buildExpandedDetails() : Container(),

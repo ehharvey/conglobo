@@ -39,7 +39,9 @@ class AppManagerConfig:
         return {cp.backend.service.name: cp for cp in self.current_paths}
 
     @property
-    def apps(self) -> List[App]:
+    def active_apps(self) -> List[App]:
+        app_configs_dict = {a.name: a for a in self.config.app_configs}
+
         result = []
 
         for hip in self.current_paths:
@@ -69,7 +71,11 @@ class AppManagerConfig:
                 c for c in deployment.spec.template.spec.containers
             ]
 
-            if len(v1_containers) != 1:
+            if (
+                len(v1_containers) != 1
+                or "conglobo" in name
+                or name not in app_configs_dict
+            ):
                 continue
 
             app_container = AppContainer(
@@ -93,11 +99,15 @@ class AppManagerConfig:
                     url_path=url_path,
                     container=app_container,
                     replicas=replicas,
+                    active=True,
+                    description=app_configs_dict[name].description,
+                    displayName=app_configs_dict[name].displayName,
+                    displayUrlPath=app_configs_dict[name].displayUrlPath,
                 )
             )
 
         return result
 
     @property
-    def apps_dict(self) -> Dict[str, App]:
-        return {a.name: a for a in self.apps}
+    def active_apps_dict(self) -> Dict[str, App]:
+        return {a.name: a for a in self.active_apps}

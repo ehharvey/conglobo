@@ -2,26 +2,25 @@ import 'dart:convert';
 
 import 'package:http/http.dart';
 
-import '../model/services.dart';
+import '../model/apps.dart';
 
 void main(List<String> args) {
-  getServices();
+  getApps();
 }
 
-Future<void> toggleServiceStatus(
-    {required String serviceName, required bool serviceStatus}) async {
-  final url = Uri.parse(
-      '/active-service/toggle?title=$serviceName&status=$serviceStatus');
-  final headers = {"Content-type": "application/json"};
-  final response = await post(url, headers: headers);
-  //print(response.body);
+Future<void> activateApp({required String appName}) async {
+  final url = Uri.parse('http://localhost:8080/conglobo/apps/$appName');
+  final response = await post(url);
 }
 
-Future<Services> getServices() async {
-  final url = Uri.parse('/active-service');
-  final headers = {"Content-type": "application/json"};
-  final response = await get(url, headers: headers);
-  final data = Services.fromJson(jsonDecode(response.body));
-  print(data.services['Masodon Social Platform']!.description);
+Future<void> deactivateApp({required String appName}) async {
+  final url = Uri.parse('http://localhost:8080/conglobo/apps/$appName');
+  final response = await delete(url);
+}
+
+Future<Apps> getApps() async {
+  final url = Uri.parse('http://localhost:8080/conglobo/apps');
+  final response = await get(url);
+  final data = Apps.fromJson(jsonDecode(response.body));
   return data;
 }
