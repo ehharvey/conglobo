@@ -1,7 +1,7 @@
 import 'package:conglobo_app/api/api.dart';
 import 'package:flutter/material.dart';
 
-import '../model/services.dart';
+import '../model/apps.dart';
 
 class MyToggleButton extends StatefulWidget {
   final String chosenService;
@@ -14,13 +14,13 @@ class MyToggleButton extends StatefulWidget {
 
 class _MyToggleButtonState extends State<MyToggleButton> {
   bool _isOn = true;
-  Services _serviceStatuses = Services(services: {});
+  Apps _serviceStatuses = Apps(services: {});
 
   @override
   Widget build(BuildContext context) {
     final String serviceName = widget.chosenService;
-    return FutureBuilder<Services>(
-      future: getServices(),
+    return FutureBuilder<Apps>(
+      future: getApps(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const CircularProgressIndicator();
@@ -29,7 +29,7 @@ class _MyToggleButtonState extends State<MyToggleButton> {
         } else {
           _serviceStatuses = snapshot.data!;
           final bool serviceStatus =
-              _serviceStatuses.services[serviceName]?.status ?? false;
+              _serviceStatuses.services[serviceName]?.active ?? false;
           _isOn = serviceStatus;
           return Container(
             height: 50,
@@ -39,11 +39,17 @@ class _MyToggleButtonState extends State<MyToggleButton> {
                 !_isOn,
               ],
               onPressed: (int index) async {
-                await toggleServiceStatus(
-                    serviceName: serviceName, serviceStatus: _isOn);
-                setState(() {
-                  _isOn = !_isOn;
-                });
+                if (_isOn) {
+                  await deactivateApp(appName: serviceName);
+                  setState(() {
+                    _isOn = false;
+                  });
+                } else {
+                  await activateApp(appName: serviceName);
+                  setState(() {
+                    _isOn = true;
+                  });
+                }
               },
               fillColor: Colors.blue,
               selectedColor: Colors.white,

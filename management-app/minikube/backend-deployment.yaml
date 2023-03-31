@@ -24,13 +24,19 @@ spec:
             name: conglobo-config
             items:
               - key: config
-                path: services.json
+                path: app_configs.yaml
       serviceAccountName: conglobo-service-account
       containers:
         - image: conglobo-management-app
           imagePullPolicy: Never
           name: conglobo
-          # Her
+          resources:
+            limits:
+              cpu: "0.5"
+              memory: "256Mi"
+            requests:
+              cpu: "0.1"
+              memory: "64Mi"
           volumeMounts:
             - name: conglobo-persistent-storage
               mountPath: /persistent-storage

@@ -15,13 +15,13 @@ test_app = App(
 app_manager = AppManager(CongloboEnvironment())
 
 # Add app, deploy
-app_manager.add_app(test_app)
+app_manager.activate_app(test_app)
 
 # Print current apps
-print(app_manager.config.apps)
+print(app_manager.config.active_apps)
 
 # Apps can also be retrieved as a Dict[app-name: str, app]
-app_dict = app_manager.config.apps_dict
+app_dict = app_manager.config.active_apps_dict
 
 # Delete app
-app_manager.delete_app(name=test_app.name)
+app_manager.deactivate_app(name=test_app.name)

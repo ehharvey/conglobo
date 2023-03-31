@@ -1,3 +1,6 @@
+from typing import List
+
+from app_management.app_definition import AppDefinition
 from conglobo_environment import CongloboEnvironment
 from app_management.app_manager_config import AppManagerConfig
 from app_management.app import App
@@ -5,11 +8,11 @@ from app_management.app import App
 from kubernetes import client, config
 
 
-class AppAlreadyExists(Exception):
+class AppAlreadyActivated(Exception):
     """Exception thrown when App already exists"""
 
 
-class AppDoesNotExist(Exception):
+class AppAlreadyDeactivated(Exception):
     """Exception thrown when App does not exist"""
 
 
@@ -31,9 +34,21 @@ class AppManager:
             core_api=core_api,
         )
 
-    def add_app(self, app: App):
-        if app.name in self.config.apps:
-            raise AppAlreadyExists
+        self.app_configs = conglobo_environment.app_configs
+
+    @property
+    def apps(self) -> List[App]:
+        apps_dict = self.config.active_apps_dict
+
+        return list(apps_dict.values()) + [
+            App(**a.dict(), active=False)
+            for a in self.app_configs
+            if a.name not in apps_dict
+        ]
+
+    def activate_app(self, app: App):
+        if app.name in self.config.active_apps:
+            raise AppAlreadyActivated
 
         # Get deployment
         deployment = app.deployment
@@ -66,11 +81,11 @@ class AppManager:
             body=existing_ingress,
         )
 
-    def delete_app(self, name: str):
-        current_apps_dict = self.config.apps_dict
+    def deactivate_app(self, name: str):
+        current_apps_dict = self.config.active_apps_dict
 
         if name not in current_apps_dict:
-            raise AppDoesNotExist
+            raise AppAlreadyDeactivated
 
         app = current_apps_dict[name]
 

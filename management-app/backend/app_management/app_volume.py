@@ -5,7 +5,7 @@ from pathlib import Path
 
 
 class AppVolume(BaseModel):
-    mount_path: Path
+    mount_path: str
     storage: str
 
     @property

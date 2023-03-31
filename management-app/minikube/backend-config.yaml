@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: conglobo-config
+data:
+  config: |
+    ---
+    apps:
+      - name: vscode
+        url_path: /vscode(/|$)(.*)
+        displayName: VSCode
+        displayUrlPath: /vscode
+        container:
+          image: linuxserver/code-server
+          port: 8443
+          volumes: []
+        description: description

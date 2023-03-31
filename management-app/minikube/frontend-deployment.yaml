@@ -1,0 +1,49 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: conglobo-frontend
+  labels:
+    app: conglobo-frontend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: conglobo-frontend
+  template:
+    metadata:
+      labels:
+        app: conglobo-frontend
+    spec:
+      containers:
+        - name: conglobo-frontend
+          image: nginx:latest
+          ports:
+            - containerPort: 80
+          volumeMounts:
+            - name: html
+              mountPath: /usr/share/nginx/html
+          resources:
+            limits:
+              cpu: "0.5"
+              memory: "256Mi"
+            requests:
+              cpu: "0.1"
+              memory: "64Mi"
+      volumes:
+        - name: html
+          hostPath:
+            path: /workspaces/conglobo/management-app/frontend/build/web
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: conglobo-frontend
+spec:
+  selector:
+    app: conglobo-frontend
+  ports:
+    - name: http
+      protocol: TCP
+      port: 80
+      targetPort: 80

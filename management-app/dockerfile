@@ -3,10 +3,10 @@ FROM python:3.8-slim-buster
 WORKDIR /managment-app
 
 COPY backend backend
-COPY frontend/build/web frontend/build/web
 
 COPY backend/requirements.txt requirements.txt
 RUN pip install -r requirements.txt
+RUN pip install flask-cors
 
 RUN pip install waitress
 
